@@ -17,7 +17,8 @@ defmodule PawMonWeb.Router do
   scope "/", PawMonWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
+    live "/", NodeLive.Index, :index
+    live "/showqr", NodeLive.Index, :show_qr
   end
 
   # Other scopes may use custom stacks.
