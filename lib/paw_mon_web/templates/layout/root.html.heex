@@ -8,23 +8,25 @@
     <%= live_title_tag assigns[:page_title] || "PawMon", suffix: " · Phoenix Framework" %>
     <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}/>
     <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600&display=swap" rel="stylesheet">
   </head>
-  <body>
-    <header>
-      <section class="container">
-        <nav>
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
-            <% end %>
-          </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src={Routes.static_path(@conn, "/images/phoenix.png")} alt="Phoenix Framework Logo"/>
+  <body class="text-gray-800">
+    <header class="bg-white shadow-sm">
+      <section class="container mx-auto px-2 md:px-4 py-8 flex justify-center">
+        <a href="https://phoenixframework.org/" class="flex items-center gap-4">
+          <img src={Routes.static_path(@conn, "/images/paw.svg")} alt="Paw Logo" class="w-6 transform -rotate-12" />
+          <span class="uppercase font-light text-2xl tracking-widest">
+            Paw Mon
+          </span>
+          <img src={Routes.static_path(@conn, "/images/paw.svg")} alt="Paw Logo" class="w-6 transform rotate-12" />
         </a>
       </section>
     </header>
-    <%= @inner_content %>
+    <div class="bg-coolGray-100">
+      <%= @inner_content %>
+    </div>
   </body>
 </html>
