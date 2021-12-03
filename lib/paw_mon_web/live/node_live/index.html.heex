@@ -7,7 +7,7 @@
 <% end %>
 
 <div class="grid gap-x-8 gap-y-8 mb-8">
-  <div class="hidden md:block col-start-10 col-span-3 row-start-1 row-span-4 justify-self-end">
+  <div class="hidden md:block col-start-10 col-span-3 row-start-1 row-span-3 justify-self-end">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Representative QR</div>
     <img
       alt=""
@@ -25,24 +25,27 @@
   </div>
 
   <div class="col-start-1 col-span-12 md:col-span-8">
-    <div class="uppercase font-light tracking-widest text-xs mb-1">Tribe info</div>
-    <h1 class="font-semibold text-4xl mb-4"><%= @node.name %></h1>
-    <div class="markdown text-gray-700 font-normal break-words">
-      <p class="mb-4">
-        🐼🐼🐼 Now on upgraded hardware!
-      </p>
-      <p class="mb-4">
-        Paw Mon is custom built for this node. If there is enough interest, it may be polished and open-sourced.
-      </p>
-      <p>
-        Donation:
-        <a
-          class="text-teal-500 hover:underline hover:text-teal-600 transition-colors duration-150 break-all"
-          href="paw:paw_38cqdj8qkpza4d7sbemfiz9hezfchgqhne5qr1saawbk8qd53boy9c986oww"
-        >
-          paw_38cqdj8qkpza4d7sbemfiz9hezfchgqhne5qr1saawbk8qd53boy9c986oww
-        </a>
-      </p>
+    <div class="uppercase font-light tracking-widest text-xs mb-2">Tribe info</div>
+
+    <div class="px-6 py-4 bg-white rounded-md shadow-md">
+      <h1 class="font-bold text-2xl mb-4"><%= @node.name %></h1>
+      <div class="markdown text-gray-700 font-normal break-words">
+        <p class="mb-4">
+          🐼🐼🐼 Now on upgraded hardware!
+        </p>
+        <p class="mb-4">
+          Paw Mon is custom built for this node. If there is enough interest, it may be polished and open-sourced.
+        </p>
+        <p>
+          Donation:
+          <a
+            class="text-teal-500 hover:underline hover:text-teal-600 transition-colors duration-150 break-all"
+            href="paw:paw_38cqdj8qkpza4d7sbemfiz9hezfchgqhne5qr1saawbk8qd53boy9c986oww"
+          >
+            paw_38cqdj8qkpza4d7sbemfiz9hezfchgqhne5qr1saawbk8qd53boy9c986oww
+          </a>
+        </p>
+      </div>
     </div>
   </div>
 
@@ -83,23 +86,23 @@
   </div>
 </div>
 
-<div class="grid grid-cols-12 gap-4 cursor-default mb-8">
+<div class="grid grid-cols-12 gap-4 cursor-default">
   <div class="col-span-8">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Status</div>
     <div class="grid grid-cols-3 gap-4">
       <div class="px-6 py-4 rounded-md bg-gradient-to-tr from-teal-500 to-teal-400 shadow-md flex flex-col gap-2 text-white">
         <div class="text-sm tracking-wide truncate">Version</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_version(@stats) %></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_version(@telemetry) %></div>
       </div>
 
       <div class="px-6 py-4 rounded-md bg-gradient-to-tr from-sky-500 to-sky-400 shadow-md flex flex-col gap-2 text-white">
         <div class="text-sm tracking-wide truncate">Uptime</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_uptime(@stats.uptime) %></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_uptime(@telemetry["uptime"]) %></div>
       </div>
 
       <div class="px-6 py-4 rounded-md bg-gradient-to-tr from-emerald-500 to-emerald-400 shadow-md flex flex-col gap-2 text-white">
         <div class="text-sm tracking-wide truncate">Sync Status</div>
-        <div class="text-xl font-semibold leading-tight"><%= @stats.sync_status %>%</div>
+        <div class="text-xl font-semibold leading-tight"><%= format_integer(@sync_status) %>%</div>
       </div>
     </div>
   </div>
@@ -107,9 +110,8 @@
     <div class="uppercase font-light tracking-widest text-xs mb-2">System Metrics</div>
     <div class="flex flex-auto flex-col gap-4 justify-between">
       <style>
-        .cpu-load {width: <%= @stats.cpu_load %>%}
-        .memory-load {width: <%= @stats.memory_load %>%}
-        .disk-load {width: <%= @stats.disk_load %>%}
+        .cpu-load {width: <%= @os_data.cpu_load %>%}
+        .memory-load {width: <%= @os_data.memory_percent %>%}
       </style>
       <div class="w-full px-6 py-4 rounded-md bg-white shadow-md flex flex-col gap-2">
         <div class="text-sm tracking-wide truncate mb-2">CPU Load</div>
@@ -124,10 +126,8 @@
         </div>
       </div>
       <div class="w-full px-6 py-4 rounded-md bg-white shadow-md flex flex-col gap-2">
-        <div class="text-sm tracking-wide truncate mb-2">Disk</div>
-        <div class="rounded-full h-4 bg-coolGray-200 overflow-hidden">
-          <div class="h-4 bg-gradient-to-tr from-emerald-500 to-emerald-400 disk-load"></div>
-        </div>
+        <div class="text-sm tracking-wide truncate mb-2">Location</div>
+        <div class="text-xl font-semibold leading-tight"><%= @node_location %></div>
       </div>
     </div>
   </div>
@@ -137,17 +137,17 @@
     <div class="grid grid-cols-3 gap-4">
       <div class="px-6 py-4 bg-white rounded-md shadow-md flex flex-col gap-2">
         <div class="text-sm tracking-wide truncate">Count</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_number(@stats.block_count) %></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_integer(@block_count["count"]) %></div>
       </div>
 
       <div class="px-6 py-4 bg-white rounded-md shadow-md flex flex-col gap-2">
         <div class="text-sm tracking-wide truncate">Cemented</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_number(@stats.cemented_count) %></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_integer(@block_count["cemented"]) %></div>
       </div>
 
       <div class="px-6 py-4 bg-white rounded-md shadow-md flex flex-col gap-2">
         <div class="text-sm tracking-wide truncate">Unchecked</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_number(@stats.unchecked_count) %></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_integer(@block_count["unchecked"]) %></div>
       </div>
     </div>
   </div>
@@ -157,17 +157,17 @@
     <div class="grid grid-cols-3 gap-4">
       <div class="px-6 py-4 bg-white rounded-md shadow-md flex flex-col gap-2">
         <div class="text-sm tracking-wide truncate">Balance</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_balance(@stats.balance) %></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_balance(@account_balance["balance"]) %></div>
       </div>
 
       <div class="px-6 py-4 bg-white rounded-md shadow-md flex flex-col gap-2">
         <div class="text-sm tracking-wide truncate">Pending</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_balance(@stats.pending_balance) %></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_balance(@account_balance["receivable"]) %></div>
       </div>
 
       <div class="px-6 py-4 bg-white rounded-md shadow-md flex flex-col gap-2">
         <div class="text-sm tracking-wide truncate">Voting Weight</div>
-        <div class="text-xl font-semibold leading-tight"><%= format_balance(@stats.vote_weight) %> <span class="font-normal text-xs text-coolGray-600">(<%= format_balance(@stats.vote_percentage) %>%)</span></div>
+        <div class="text-xl font-semibold leading-tight"><%= format_balance(@account_weight["weight"]) %> <span class="font-normal text-xs text-coolGray-600">(<%= format_number(@node_quorum, 4) %>%)</span></div>
       </div>
     </div>
   </div>
