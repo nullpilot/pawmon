@@ -3,28 +3,15 @@ defmodule PawMonWeb.NodeLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    os_data = get_os_data()
-    telemetry = telemetry()
-    block_count = block_count()
-    node = get_node()
-    account_balance = account_balance(node.address)
-    account_weight = account_weight(node.address)
-    quorum = confirmation_quorum()
-    ip_info = ip_info()
 
-    {:ok, socket
-     |> assign(:node, node)
-     |> assign(:telemetry, telemetry)
-     |> assign(:block_count, block_count)
-     |> assign(:os_data, os_data)
-     |> assign(:account_balance, account_balance)
-     |> assign(:account_weight, account_weight)
-     |> assign(:sync_status, sync_status(block_count, telemetry))
-     |> assign(:node_quorum, node_quorum(account_weight, quorum))
-     |> assign(:node_location, node_location(ip_info))
-     |> assign(:page_title, node.name)
-     |> assign(:live_action, :index)
-    }
+    socket = socket
+    |> load_full_node_status()
+
+    if connected?(socket) do
+      :timer.send_interval(5000, :update)
+    end
+
+    {:ok, socket}
   end
 
   @impl true
@@ -35,6 +22,36 @@ defmodule PawMonWeb.NodeLive.Index do
   @impl true
   def handle_event(_event, _params, socket) do
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info(:update, socket) do
+    {:noreply, socket
+     |> load_full_node_status()}
+  end
+
+  def load_full_node_status(socket) do
+    os_data = get_os_data()
+    telemetry = telemetry()
+    block_count = block_count()
+    node = get_node()
+    account_balance = account_balance(node.address)
+    account_weight = account_weight(node.address)
+    quorum = confirmation_quorum()
+    ip_info = ip_info()
+
+    socket
+    |> assign(:node, node)
+    |> assign(:telemetry, telemetry)
+    |> assign(:block_count, block_count)
+    |> assign(:os_data, os_data)
+    |> assign(:account_balance, account_balance)
+    |> assign(:account_weight, account_weight)
+    |> assign(:sync_status, sync_status(block_count, telemetry))
+    |> assign(:node_quorum, node_quorum(account_weight, quorum))
+    |> assign(:node_location, node_location(ip_info))
+    |> assign(:page_title, node.name)
+    |> assign(:live_action, :index)
   end
 
   def get_os_data() do
