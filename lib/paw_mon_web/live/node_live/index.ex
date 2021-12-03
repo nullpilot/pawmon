@@ -123,7 +123,7 @@ defmodule PawMonWeb.NodeLive.Index do
       Tesla.Middleware.JSON
     ])
 
-    case Tesla.get(client, "/json") do
+    case Tesla.get(client, "/5.9.62.111/json") do
       {:ok, %Tesla.Env{status: 200, body: ip_info}} -> ip_info
       {:error, error} -> throw error
     end
@@ -150,7 +150,6 @@ defmodule PawMonWeb.NodeLive.Index do
     |> String.to_integer()
     |> Timex.Duration.from_seconds()
     |> PawMon.UptimeFormatter.format()
-    |> IO.inspect
   end
 
   def sync_status(%{"count" => local_count}, %{"block_count" => network_count}) do

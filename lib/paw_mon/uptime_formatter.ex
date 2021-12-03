@@ -67,9 +67,6 @@ defmodule PawMon.UptimeFormatter do
 
   defp do_format([{unit, value} | rest], str, locale) do
     unit = Atom.to_string(unit)
-    count = trunc(value)
-
-    IO.inspect({unit, value}, label: "format:translate")
 
     unit_with_value = "#{value}#{abbr(unit)}"
 
@@ -134,5 +131,5 @@ defmodule PawMon.UptimeFormatter do
   defp abbr("day"), do: "D"
   defp abbr("month"), do: "M"
   defp abbr("year"), do: "Y"
-  defp abbr(unit), do: IO.inspect(unit, label: "unknown unit")
+  defp abbr(_), do: ""
 end
