@@ -3,8 +3,10 @@ defmodule PawMonWeb.NodeLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    ip_info = ip_info()
 
     socket = socket
+    |> assign(:node_location, node_location(ip_info))
     |> load_full_node_status()
 
     if connected?(socket) do
@@ -38,7 +40,6 @@ defmodule PawMonWeb.NodeLive.Index do
     account_balance = account_balance(node.address)
     account_weight = account_weight(node.address)
     quorum = confirmation_quorum()
-    ip_info = ip_info()
 
     socket
     |> assign(:node, node)
@@ -49,7 +50,6 @@ defmodule PawMonWeb.NodeLive.Index do
     |> assign(:account_weight, account_weight)
     |> assign(:sync_status, sync_status(block_count, telemetry))
     |> assign(:node_quorum, node_quorum(account_weight, quorum))
-    |> assign(:node_location, node_location(ip_info))
     |> assign(:page_title, node.name)
     |> assign(:live_action, :index)
   end
