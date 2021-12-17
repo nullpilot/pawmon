@@ -36,18 +36,25 @@ defmodule PawMonWeb.NodeLive.Index do
     os_data = get_os_data()
     telemetry = telemetry()
     block_count = block_count()
+    peers = get_peers()
     node = get_node()
     account_balance = account_balance(node.address)
     account_weight = account_weight(node.address)
+    delegators_count = get_delegators_count(node.address)
+    reps = get_reps_online()
     quorum = confirmation_quorum()
 
     socket
     |> assign(:node, node)
     |> assign(:telemetry, telemetry)
     |> assign(:block_count, block_count)
+    |> assign(:peer_count, length(Map.keys(peers)))
+    |> assign(:rep_count, length(reps))
     |> assign(:os_data, os_data)
     |> assign(:account_balance, account_balance)
     |> assign(:account_weight, account_weight)
+    |> assign(:delegators_count, delegators_count)
+    |> assign(:quorum, quorum)
     |> assign(:sync_status, sync_status(block_count, telemetry))
     |> assign(:node_quorum, node_quorum(account_weight, quorum))
     |> assign(:page_title, node.name)
@@ -55,23 +62,19 @@ defmodule PawMonWeb.NodeLive.Index do
   end
 
   def get_os_data() do
-    disk =
-      case :disksup.get_disk_data() do
-        [{'none', 0, 0}] -> []
-        other -> other
-      end
+    gb = Integer.pow(1024, 3)
+    {mem_total, mem_allocated, _} = :memsup.get_memory_data()
 
-    memory = :memsup.get_system_memory_data()
-    used_memory_percent = 20
+    used_memory_percent = mem_allocated / mem_total * 100
 
     %{
       cpu_avg1: :cpu_sup.avg1(),
       cpu_avg5: :cpu_sup.avg5(),
       cpu_avg15: :cpu_sup.avg15(),
       cpu_load: :cpu_sup.util(),
-      disk: disk,
       memory_percent: used_memory_percent,
-      system_mem: memory
+      memory_total: mem_total / gb,
+      memory_allocated: mem_allocated / gb
     }
   end
 
@@ -113,6 +116,27 @@ defmodule PawMonWeb.NodeLive.Index do
   def account_weight(account) do
     case Tesla.post(client(), "/", %{action: "account_weight", account: account}) do
       {:ok, %Tesla.Env{status: 200, body: account_weight}} -> account_weight
+      {:error, error} -> throw error
+    end
+  end
+
+  def get_peers() do
+    case Tesla.post(client(), "/", %{action: "peers"}) do
+      {:ok, %Tesla.Env{status: 200, body: %{"peers" => peers}}} -> peers
+      {:error, error} -> throw error
+    end
+  end
+
+  def get_reps_online() do
+    case Tesla.post(client(), "/", %{action: "representatives_online"}) do
+      {:ok, %Tesla.Env{status: 200, body: %{"representatives" => reps}}} -> reps
+      {:error, error} -> throw error
+    end
+  end
+
+  def get_delegators_count(account) do
+    case Tesla.post(client(), "/", %{action: "delegators_count", account: account}) do
+      {:ok, %Tesla.Env{status: 200, body: %{"count" => count}}} -> String.to_integer(count)
       {:error, error} -> throw error
     end
   end
@@ -166,7 +190,8 @@ defmodule PawMonWeb.NodeLive.Index do
 
   def format_number(number, precision \\ 2), do: Number.Delimit.number_to_delimited(number, precision: precision)
 
-  def format_balance(nil), do: format_balance(0)
+  def format_balance(nil), do: 0
+  def format_balance("0"), do: 0
   def format_balance(balance), do: format_number(from_raw(Decimal.new(balance)), 3)
 
   def from_raw(balance) do
