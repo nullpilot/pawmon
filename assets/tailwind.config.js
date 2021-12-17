@@ -10,6 +10,10 @@ module.exports = {
   ],
   darkMode: 'media',
   theme: {
+    screens: {
+      'xs': '475px',
+      ...defaultTheme.screens,
+    },
     extend: {
       colors: {
         transparent: 'transparent',

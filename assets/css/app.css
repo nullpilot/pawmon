@@ -2,6 +2,10 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+.bg-separator {
+  background: linear-gradient(45deg, rgb(29, 224, 153), rgb(29, 200, 205)) no-repeat;
+}
+
 /* Alerts and form errors used by phx.new */
 .alert {
   padding: 15px;
