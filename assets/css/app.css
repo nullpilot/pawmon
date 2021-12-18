@@ -6,6 +6,16 @@
   background: linear-gradient(45deg, rgb(29, 224, 153), rgb(29, 200, 205)) no-repeat;
 }
 
+@layer utilities {
+  .drag-none {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+  }
+}
+
 /* Alerts and form errors used by phx.new */
 .alert {
   padding: 15px;

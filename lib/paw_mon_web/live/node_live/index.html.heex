@@ -8,16 +8,16 @@
 
 <div class="grid grid-cols-12 gap-x-8 gap-y-8 mb-8">
   <div class="hidden md:block col-start-10 col-span-3 row-start-2 row-span-3 justify-self-end">
-    <div class="uppercase font-light tracking-widest text-xs mb-2">Representative QR</div>
+    <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Representative QR</div>
     <img
       alt=""
-      class="w-32 md:w-48 max-w-full overflow-hidden rounded-md shadow-md"
+      class="w-32 md:w-48 max-w-full overflow-hidden rounded-md shadow-md select-none drag-none"
       src={qr_url(@node.address)}
     >
   </div>
 
   <div class="col-start-1 col-span-12 md:col-span-9 row-start-1 flex-auto">
-    <div class="uppercase font-light tracking-widest text-xs mb-2">Currency / Chain</div>
+    <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Currency / Chain</div>
     <p class="flex gap-2 items-center">
       <img src={Routes.static_path(@socket, "/images/paw_logo.svg")} alt="Paw Logo" class="w-12">
       <span class="text-4xl tracking-wide font-extralight">PAW</span>
@@ -25,7 +25,7 @@
   </div>
 
   <div class="col-start-1 col-span-12 md:col-span-9">
-    <div class="uppercase font-light tracking-widest text-xs mb-2">Tribe info</div>
+    <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Tribe info</div>
 
     <div class="px-6 py-4 bg-white rounded-md shadow-md">
       <h1 class="font-bold text-2xl mb-4"><%= @node.name %></h1>
@@ -53,7 +53,7 @@
 
   <div class="col-start-1 col-span-12 md:col-span-9">
     <div class="max-w-full">
-      <div class="uppercase font-light tracking-widest text-xs mb-2">Representative Address</div>
+      <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Representative Address</div>
       <div class="w-full max-w-full flex items-center py-3 px-2 bg-white rounded-md shadow-md">
         <div class="flex-auto px-4 mr-2 border-r-2 border-teal-300 truncate">
           <a
