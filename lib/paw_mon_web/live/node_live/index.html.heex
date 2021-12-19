@@ -27,27 +27,8 @@
   <div class="col-start-1 col-span-12 md:col-span-9">
     <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Tribe info</div>
 
-    <div class="px-6 py-4 bg-white rounded-md shadow-md">
-      <h1 class="font-bold text-2xl mb-4"><%= @node.name %></h1>
-      <div class="markdown text-gray-700 font-normal break-words">
-        <p class="mb-4">
-          🐼🐼🐼 Now on upgraded hardware!
-        </p>
-        <p class="mb-4">
-          Paw Mon is custom built for this node. If there is enough interest, it may be polished and open-sourced.
-        </p>
-        <p>
-          Donation:
-          <a
-            class="text-teal-500 hover:underline hover:text-teal-600 transition-colors duration-150 break-all"
-            href="paw:paw_38cqdj8qkpza4d7sbemfiz9hezfchgqhne5qr1saawbk8qd53boy9c986oww"
-            target="_blank"
-            title="Open Tracker"
-          >
-            paw_38cqdj8qkpza4d7sbemfiz9hezfchgqhne5qr1saawbk8qd53boy9c986oww
-          </a>
-        </p>
-      </div>
+    <div class="px-6 py-4 bg-white rounded-md shadow-md max-w-none overflow-auto markdown">
+      <%= raw(@description) %>
     </div>
   </div>
 

@@ -4,9 +4,11 @@ defmodule PawMonWeb.NodeLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     ip_info = ip_info()
+    description = load_node_description()
 
     socket = socket
     |> assign(:node_location, node_location(ip_info))
+    |> assign(:description, description)
     |> load_full_node_status()
 
     if connected?(socket) do
@@ -59,6 +61,14 @@ defmodule PawMonWeb.NodeLive.Index do
     |> assign(:node_quorum, node_quorum(account_weight, quorum))
     |> assign(:page_title, node.name)
     |> assign(:live_action, :index)
+  end
+
+  def load_node_description() do
+    path = Path.expand("./priv/pawmon/description.md")
+    {:ok, description} = File.read(path)
+    {:ok, html, _} = Earmark.as_html(description)
+
+    html
   end
 
   def get_os_data() do

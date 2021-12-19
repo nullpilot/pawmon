@@ -50,6 +50,7 @@ defmodule PawMon.MixProject do
       {:decimal, "~> 2.0"},
       {:number, "~> 1.0"},
       {:timex, "~> 3.0"},
+      {:earmark, "~> 1.4"},
 
       # Tesla still relies on old versions
       {:telemetry, "~> 1.0", override: true},

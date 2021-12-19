@@ -1,6 +1,7 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
+@import "./markdown";
 
 .bg-separator {
   background: linear-gradient(45deg, rgb(29, 224, 153), rgb(29, 200, 205)) no-repeat;
