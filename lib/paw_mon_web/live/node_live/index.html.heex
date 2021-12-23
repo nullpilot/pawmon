@@ -7,19 +7,19 @@
 <% end %>
 
 <div class="grid grid-cols-12 gap-x-8 gap-y-8 mb-8">
-  <div class="hidden md:block col-start-10 col-span-3 row-start-2 row-span-3 justify-self-end">
+  <div class="row-start-1 col-start-10 col-span-3 md:row-start-2 md:row-span-3 justify-self-end">
     <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Representative QR</div>
     <img
       alt=""
-      class="w-32 md:w-48 max-w-full overflow-hidden rounded-md shadow-md select-none drag-none"
-      src={qr_url(@node.address)}
+      class="w-full aspect-square overflow-hidden rounded-md shadow-md select-none drag-none"
+      src={qr_url(@node["account"])}
     >
   </div>
 
-  <div class="col-start-1 col-span-12 md:col-span-9 row-start-1 flex-auto">
+  <div class="col-start-1 col-span-9 row-start-1 flex-auto">
     <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Currency / Chain</div>
     <p class="flex gap-2 items-center">
-      <img src={Routes.static_path(@socket, "/images/paw_logo.svg")} alt="Paw Logo" class="w-12">
+      <img src={Routes.static_path(@socket, "/images/paw_logo.fill.svg")} alt="Paw Logo" class="w-12">
       <span class="text-4xl tracking-wide font-extralight">PAW</span>
     </p>
   </div>
@@ -36,14 +36,14 @@
     <div class="max-w-full">
       <div class="uppercase font-light tracking-widest text-xs mb-2 cursor-default">Representative Address</div>
       <div class="w-full max-w-full flex items-center py-3 px-2 bg-white rounded-md shadow-md">
-        <div class="flex-auto px-4 mr-2 border-r-2 border-teal-300 truncate">
+        <div class="flex-auto px-4 mr-2 truncate">
           <a
             class="block w-full hover:underline hover:text-teal-600 transition-colors duration-150 text-inherit truncate max-w-full"
-            href={tracker_url(@node.address)}
+            href={tracker_url(@node["account"])}
             target="_blank"
             title="Open Tracker"
           >
-            <%= @node.address %>
+            <%= @node["account"] %>
           </a>
         </div>
         <button

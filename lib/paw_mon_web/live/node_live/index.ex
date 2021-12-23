@@ -4,11 +4,13 @@ defmodule PawMonWeb.NodeLive.Index do
   @impl true
   def mount(_params, _session, socket) do
     ip_info = ip_info()
+    config = load_pawmon_config()
     description = load_node_description()
 
     socket = socket
     |> assign(:node_location, node_location(ip_info))
     |> assign(:description, description)
+    |> assign(:config, config)
     |> load_full_node_status()
 
     if connected?(socket) do
@@ -35,16 +37,17 @@ defmodule PawMonWeb.NodeLive.Index do
   end
 
   def load_full_node_status(socket) do
+    client = rpc_client(socket.assigns.config)
     os_data = get_os_data()
-    telemetry = telemetry()
-    block_count = block_count()
-    peers = get_peers()
-    node = get_node()
-    account_balance = account_balance(node.address)
-    account_weight = account_weight(node.address)
-    delegators_count = get_delegators_count(node.address)
-    reps = get_reps_online()
-    quorum = confirmation_quorum()
+    telemetry = telemetry(client)
+    block_count = block_count(client)
+    peers = get_peers(client)
+    node = get_node(socket.assigns.config)
+    account_balance = account_balance(client, node["account"])
+    account_weight = account_weight(client, node["account"])
+    delegators_count = get_delegators_count(client, node["account"])
+    reps = get_reps_online(client)
+    quorum = confirmation_quorum(client)
 
     socket
     |> assign(:node, node)
@@ -59,8 +62,15 @@ defmodule PawMonWeb.NodeLive.Index do
     |> assign(:quorum, quorum)
     |> assign(:sync_status, sync_status(block_count, telemetry))
     |> assign(:node_quorum, node_quorum(account_weight, quorum))
-    |> assign(:page_title, node.name)
+    |> assign(:page_title, node["name"])
     |> assign(:live_action, :index)
+  end
+
+  def load_pawmon_config() do
+    path = Path.expand("./priv/pawmon/config.toml")
+    {:ok, config} = :tomerl.read_file(path)
+
+    config
   end
 
   def load_node_description() do
@@ -88,64 +98,61 @@ defmodule PawMonWeb.NodeLive.Index do
     }
   end
 
-  defp get_node do
-    %{
-      name: "Funny Looking Cats 🐼",
-      address: "paw_1wcajz9cm5kcgyyg3mhjnhn46kxgggoqt6d8mzpu14um3w14fhknfrpb1dzk"
-    }
+  defp get_node(config) do
+    config["node"]
   end
 
-  def telemetry do
-    case Tesla.post(client(), "/", %{action: "telemetry"}) do
+  def telemetry(client) do
+    case Tesla.post(client, "/", %{action: "telemetry"}) do
       {:ok, %Tesla.Env{status: 200, body: telemetry}} -> telemetry
       {:error, error} -> throw error
     end
   end
 
-  def block_count do
-    case Tesla.post(client(), "/", %{action: "block_count"}) do
+  def block_count(client) do
+    case Tesla.post(client, "/", %{action: "block_count"}) do
       {:ok, %Tesla.Env{status: 200, body: block_count}} -> block_count
       {:error, error} -> throw error
     end
   end
 
-  def confirmation_quorum do
-    case Tesla.post(client(), "/", %{action: "confirmation_quorum"}) do
+  def confirmation_quorum(client) do
+    case Tesla.post(client, "/", %{action: "confirmation_quorum"}) do
       {:ok, %Tesla.Env{status: 200, body: confirmation_quorum}} -> confirmation_quorum
       {:error, error} -> throw error
     end
   end
 
-  def account_balance(account) do
-    case Tesla.post(client(), "/", %{action: "account_balance", account: account}) do
+  def account_balance(client, account) do
+    case Tesla.post(client, "/", %{action: "account_balance", account: account}) do
       {:ok, %Tesla.Env{status: 200, body: account_balance}} -> account_balance
       {:error, error} -> throw error
     end
   end
 
-  def account_weight(account) do
-    case Tesla.post(client(), "/", %{action: "account_weight", account: account}) do
+  def account_weight(client, account) do
+    case Tesla.post(client, "/", %{action: "account_weight", account: account}) do
       {:ok, %Tesla.Env{status: 200, body: account_weight}} -> account_weight
       {:error, error} -> throw error
     end
   end
 
-  def get_peers() do
-    case Tesla.post(client(), "/", %{action: "peers"}) do
+  def get_peers(client) do
+    case Tesla.post(client, "/", %{action: "peers"}) do
       {:ok, %Tesla.Env{status: 200, body: %{"peers" => peers}}} -> peers
       {:error, error} -> throw error
     end
   end
 
-  def get_reps_online() do
-    case Tesla.post(client(), "/", %{action: "representatives_online"}) do
+  def get_reps_online(client) do
+    case Tesla.post(client, "/", %{action: "representatives_online"}) do
       {:ok, %Tesla.Env{status: 200, body: %{"representatives" => reps}}} -> reps
       {:error, error} -> throw error
     end
   end
 
-  def get_delegators_count(account) do
-    case Tesla.post(client(), "/", %{action: "delegators_count", account: account}) do
+  def get_delegators_count(client, account) do
+    case Tesla.post(client, "/", %{action: "delegators_count", account: account}) do
       {:ok, %Tesla.Env{status: 200, body: %{"count" => count}}} -> String.to_integer(count)
       {:error, error} -> throw error
     end
@@ -166,9 +173,12 @@ defmodule PawMonWeb.NodeLive.Index do
   def node_location(ip_info), do: "#{ip_info["city"]}, #{ip_info["country"]}"
 
   # build dynamic client based on runtime arguments
-  def client() do
+  def rpc_client(%{"node" => node}) do
+    host = Map.get(node, "host", "localhost")
+    rpc_port = Map.get(node, "rpc_port", "7045")
+
     middleware = [
-      {Tesla.Middleware.BaseUrl, "http://5.9.62.111:7046"},
+      {Tesla.Middleware.BaseUrl, "http://#{host}:#{rpc_port}"},
       Tesla.Middleware.JSON
     ]
 
@@ -208,11 +218,11 @@ defmodule PawMonWeb.NodeLive.Index do
     Decimal.div(balance, Decimal.new("1e27"))
   end
 
-  def qr_url(address) do
-    "https://chart.googleapis.com/chart?chs=320x320&cht=qr&chl=paw:#{address}&choe=UTF-8"
+  def qr_url(account) do
+    "https://chart.googleapis.com/chart?chs=320x320&cht=qr&chl=paw:#{account}&choe=UTF-8"
   end
 
-  def tracker_url(address) do
-    "https://tracker.paw.digital/account/#{address}"
+  def tracker_url(account) do
+    "https://tracker.paw.digital/account/#{account}"
   end
 end
