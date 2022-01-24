@@ -41,6 +41,7 @@ defmodule PawMonWeb.NodeLive.Index do
     os_data = get_os_data()
     telemetry = telemetry(client)
     block_count = block_count(client)
+    uptime = get_uptime(client)
     peers = get_peers(client)
     node = get_node(socket.assigns.config)
     account_balance = account_balance(client, node["account"])
@@ -60,6 +61,7 @@ defmodule PawMonWeb.NodeLive.Index do
     |> assign(:account_weight, account_weight)
     |> assign(:delegators_count, delegators_count)
     |> assign(:quorum, quorum)
+    |> assign(:uptime, uptime)
     |> assign(:sync_status, sync_status(block_count, telemetry))
     |> assign(:node_quorum, node_quorum(account_weight, quorum))
     |> assign(:page_title, node["name"])
@@ -140,6 +142,13 @@ defmodule PawMonWeb.NodeLive.Index do
   def get_peers(client) do
     case Tesla.post(client, "/", %{action: "peers"}) do
       {:ok, %Tesla.Env{status: 200, body: %{"peers" => peers}}} -> peers
+      {:error, error} -> throw error
+    end
+  end
+
+  def get_uptime(client) do
+    case Tesla.post(client, "/", %{action: "uptime"}) do
+      {:ok, %Tesla.Env{status: 200, body: %{"seconds" => uptime}}} -> uptime
       {:error, error} -> throw error
     end
   end
