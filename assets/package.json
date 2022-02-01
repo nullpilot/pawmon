@@ -1,9 +1,10 @@
 {
   "scripts": {
-    "deploy": "NODE_ENV=production postcss css/app.css -o ../priv/static/assets/app.css"
+    "deploy": "NODE_ENV=production tailwindcss --postcss -i css/app.css -o ../priv/static/assets/app.css"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.0",
+    "cssnano": "^5.0.16",
     "postcss": "^8.4.5",
     "postcss-import": "^14.0.2",
     "postcss-nested": "^5.0.6",
