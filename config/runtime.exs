@@ -1,5 +1,15 @@
 import Config
 
+if System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME") do
+  config :paw_mon, PawMonWeb.Endpoint,
+    server: true
+end
+
+host = System.get_env("PHX_HOST") || "example.com"
+
+config :paw_mon, PawMonWeb.Endpoint,
+  url: [host: host, port: 4000]
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration
@@ -29,6 +39,12 @@ if config_env() == :prod do
       port: String.to_integer(System.get_env("PORT") || "4000")
     ],
     secret_key_base: secret_key_base
+
+  data_dir =
+    System.get_env("PAWMON_DATA_DIR") || "./data"
+
+  config :paw_mon, PawMon.DynamicConfig,
+    data_dir: data_dir
 
   # ## Using releases
   #
