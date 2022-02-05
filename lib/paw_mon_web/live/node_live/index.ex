@@ -234,4 +234,33 @@ defmodule PawMonWeb.NodeLive.Index do
   def tracker_url(account) do
     "https://tracker.paw.digital/account/#{account}"
   end
+
+  def paw_account(%{account: "paw_" <> _account} = assigns) do
+    ~H"""
+    <a
+      href={tracker_url(@account)}
+      target="_blank"
+      title="Show on tracker.paw.digital"
+      class="flex group font-mono"
+    >
+      <span class="text-sky-600 group-hover:text-teal-500 transition-colors duration-100"><span>paw_</span><%= account_prefix(@account) %></span>
+      <span class="truncate text-gray-800 group-hover:text-teal-500 transition-colors duration-100"><%= account_middle(@account) %></span>
+      <span class="text-amber-600 group-hover:text-teal-500 transition-colors duration-100"><%= account_suffix(@account) %></span>
+    </a>
+    """
+  end
+  def paw_account(%{account: nil} = assigns) do
+    ~H"""
+    <span class="font-mono">not set</span>
+    """
+  end
+  def paw_account(%{account: account} = assigns) do
+    ~H"""
+    <span class="font-mono"><%= @account %></span>
+    """
+  end
+
+  def account_prefix(account), do: String.slice(account, 4, 6)
+  def account_middle(account), do: String.slice(account, 10, 48)
+  def account_suffix(account), do: String.slice(account, 58, 6)
 end
