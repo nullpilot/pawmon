@@ -13,10 +13,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600&display=swap" rel="stylesheet">
   </head>
-  <body class="text-gray-800">
+  <body class="min-h-screen text-gray-800 flex flex-col">
     <div class="h-1 bg-separator"></div>
     <header class="bg-white shadow-sm">
-      <section class="container mx-auto px-2 md:px-4 py-8 flex justify-center">
+      <section class="container mx-auto px-2 md:px-4 py-4 flex justify-center">
         <a href="https://phoenixframework.org/" class="flex items-center gap-4">
           <img src={Routes.static_path(@conn, "/images/paw.svg")} alt="Paw Logo" class="w-6 transform -rotate-12" />
           <span class="uppercase font-light text-2xl tracking-widest">
@@ -26,7 +26,7 @@
         </a>
       </section>
     </header>
-    <div class="bg-slate-200">
+    <div class="bg-slate-200 grow">
       <%= @inner_content %>
     </div>
   </body>
