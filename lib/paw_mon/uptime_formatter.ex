@@ -95,9 +95,6 @@ defmodule PawMon.UptimeFormatter do
       seconds >= @month ->
         deconstruct({rem(seconds, @month), us}, [{:month, div(seconds, @month)} | components])
 
-      seconds >= @week ->
-        deconstruct({rem(seconds, @week), us}, [{:week, div(seconds, @week)} | components])
-
       seconds >= @day ->
         deconstruct({rem(seconds, @day), us}, [{:day, div(seconds, @day)} | components])
 
