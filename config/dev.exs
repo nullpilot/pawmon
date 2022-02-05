@@ -27,6 +27,9 @@ config :paw_mon, PawMonWeb.Endpoint,
     ]
   ]
 
+  config :paw_mon, PawMon.DynamicConfig,
+    data_dir: "./data"
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

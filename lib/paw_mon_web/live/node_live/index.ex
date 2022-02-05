@@ -3,21 +3,38 @@ defmodule PawMonWeb.NodeLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    ip_info = ip_info()
-    config = load_pawmon_config()
-    description = load_node_description()
+    with(
+      {:ok, ip_info} <- ip_info(),
+      {:ok, config} <- load_pawmon_config()
+    ) do
+      description = load_node_description(Map.get(config, "node", %{}))
+      socket = socket
+      |> assign(:setup_unfinished, :false)
+      |> assign(:node_location, node_location(ip_info))
+      |> assign(:description, description)
+      |> assign(:config, config)
+      |> load_full_node_status()
 
-    socket = socket
-    |> assign(:node_location, node_location(ip_info))
-    |> assign(:description, description)
-    |> assign(:config, config)
-    |> load_full_node_status()
+      if connected?(socket) do
+        :timer.send_interval(5000, :update)
+      end
 
-    if connected?(socket) do
-      :timer.send_interval(5000, :update)
+      {:ok, socket}
+    else
+      {:error, error} ->
+        IO.inspect(error, label: "error")
+
+        socket = socket
+        |> assign(:setup_unfinished, :true)
+
+        {:ok, socket}
+      error ->
+        IO.inspect(error, label: "other error")
+
+        socket = socket
+        |> assign(:setup_unfinished, :true)
+        {:ok, socket}
     end
-
-    {:ok, socket}
   end
 
   @impl true
@@ -69,18 +86,41 @@ defmodule PawMonWeb.NodeLive.Index do
   end
 
   def load_pawmon_config() do
-    path = Path.expand("./priv/pawmon/config.toml")
-    {:ok, config} = :tomerl.read_file(path)
+    path = Path.join([data_dir(), "/config.toml"])
 
-    config
+    IO.inspect(path, label: "config path")
+    :tomerl.read_file(path)
   end
 
-  def load_node_description() do
-    path = Path.expand("./priv/pawmon/description.md")
-    {:ok, description} = File.read(path)
-    {:ok, html, _} = Earmark.as_html(description)
+  def load_node_description(node_config) do
+    path = Path.join([data_dir(), "/description.md"])
+    node_name = Map.get(node_config, "name", "PAW node 🐾")
+
+    IO.inspect(path, label: "markdown path")
+    raw_description = case File.read(path) do
+      {:ok, raw_description} -> raw_description
+      {:error, error} ->
+
+        IO.inspect(error, label: error)
+        """
+        # #{ node_name }
+
+        Description not set. Configure your data directory and create a `description.md` to change this section.
+        """
+    end
+
+    {:ok, html, _} = Earmark.as_html(raw_description)
 
     html
+  end
+
+  defp data_dir() do
+    opts = Application.get_env(:paw_mon, PawMon.DynamicConfig, [])
+    default_path = Path.expand("/priv/pawmon/", Application.app_dir(:paw_mon))
+
+    opts
+    |> Keyword.get(:data_dir, default_path)
+    |> Path.expand()
   end
 
   def get_os_data() do
@@ -174,8 +214,8 @@ defmodule PawMonWeb.NodeLive.Index do
     ])
 
     case Tesla.get(client, "/5.9.62.111/json") do
-      {:ok, %Tesla.Env{status: 200, body: ip_info}} -> ip_info
-      {:error, error} -> throw error
+      {:ok, %Tesla.Env{status: 200, body: ip_info}} -> {:ok, ip_info}
+      {:error, error} -> {:error, error}
     end
   end
 
