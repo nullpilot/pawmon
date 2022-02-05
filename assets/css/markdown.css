@@ -9,6 +9,10 @@
     margin-bottom: 0;
   }
 
+  & > *:first-child {
+    margin-top: 0;
+  }
+
   body {
     line-height: 1.85;
   }
@@ -16,7 +20,7 @@
   h1,
   h2 {
     border-bottom: 2px solid theme('colors.slate.200');
-    margin: theme('spacing.6') 0 theme('spacing.4');
+    margin: theme('spacing.6') 0 theme('spacing.2');
     padding-bottom: theme('spacing.1');
   }
 
@@ -30,15 +34,15 @@
   }
 
   h1 {
-    font-size: theme('fontSize.2xl');
-  }
-
-  h2 {
     font-size: theme('fontSize.xl');
   }
 
-  h3 {
+  h2 {
     font-size: theme('fontSize.lg');
+  }
+
+  h3 {
+    font-size: theme('fontSize.base');
     margin-bottom: theme('spacing.2');
   }
 
