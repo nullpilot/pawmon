@@ -294,7 +294,7 @@ defmodule PawMonWeb.NodeLive.Index do
     <span class="font-mono">not set</span>
     """
   end
-  def paw_account(%{account: account} = assigns) do
+  def paw_account(%{account: _account} = assigns) do
     ~H"""
     <span class="font-mono"><%= @account %></span>
     """

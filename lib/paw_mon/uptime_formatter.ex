@@ -10,7 +10,6 @@ defmodule PawMon.UptimeFormatter do
   @minute 60
   @hour @minute * 60
   @day @hour * 24
-  @week @day * 7
   @month @day * 30
   @year @day * 365
 
