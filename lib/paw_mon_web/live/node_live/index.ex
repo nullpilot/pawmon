@@ -15,6 +15,9 @@ defmodule PawMonWeb.NodeLive.Index do
       |> assign(:node_location, node_location(ip_info))
       |> assign(:description, description)
       |> assign(:config, config)
+      |> assign(:rpc_failed, false)
+      |> assign(:previously_online, false)
+      |> assign(:downtime, 0)
       |> load_full_node_status()
 
       if connected?(socket) do
@@ -31,7 +34,7 @@ defmodule PawMonWeb.NodeLive.Index do
 
         {:ok, socket}
       error ->
-        IO.inspect(error, label: "other error")
+        IO.inspect(error, label: "unexpected_error")
 
         socket = socket
         |> assign(:setup_unfinished, :true)
@@ -89,11 +92,24 @@ defmodule PawMonWeb.NodeLive.Index do
       |> assign(:uptime, uptime)
       |> assign(:sync_status, sync_status(block_count, telemetry))
       |> assign(:node_quorum, node_quorum(account_weight, quorum))
+      |> assign(:rpc_failed, false)
+      |> assign(:previously_online, true)
+      |> assign(:last_online, System.os_time(:second))
     else
       error ->
         socket
+        |> assign_downtime()
+        |> assign(:rpc_failed, true)
     end
   end
+
+  defp assign_downtime(%{assigns: %{last_online: last_online}} = socket) do
+    now = System.os_time(:second)
+
+    socket
+    |> assign(:downtime, now - last_online)
+  end
+  defp assign_downtime(socket), do: assign(socket, :downtime, nil)
 
   def load_pawmon_config() do
     path = Path.join([data_dir(), "/config.toml"])
@@ -109,9 +125,7 @@ defmodule PawMonWeb.NodeLive.Index do
     IO.inspect(path, label: "markdown path")
     raw_description = case File.read(path) do
       {:ok, raw_description} -> raw_description
-      {:error, error} ->
-
-        IO.inspect(error, label: error)
+      {:error, _error} ->
         """
         # #{ node_name }
 
@@ -168,26 +182,25 @@ defmodule PawMonWeb.NodeLive.Index do
 
   def node_location(ip_info), do: "#{ip_info["city"]}, #{ip_info["country"]}"
 
-  # build dynamic client based on runtime arguments
-  def rpc_client(%{"node" => node}) do
-    host = Map.get(node, "host", "localhost")
-    rpc_port = Map.get(node, "rpc_port", "7045")
-
-    middleware = [
-      {Tesla.Middleware.BaseUrl, "http://#{host}:#{rpc_port}"},
-      Tesla.Middleware.JSON
-    ]
-
-    Tesla.client(middleware)
+  def format_version(%{
+    "major_version" => major_version,
+    "minor_version" => minor_version,
+    "patch_version" => patch_version
+  }) do
+    "Paw V#{major_version}.#{minor_version}.#{patch_version}"
   end
+  def format_version(_), do: "???"
 
-  def format_version(stats) do
-    "Paw V#{stats["major_version"]}.#{stats["minor_version"]}.#{stats["patch_version"]}"
-  end
-
+  def format_uptime(nil), do: "???"
   def format_uptime(uptime) do
     uptime
     |> String.to_integer()
+    |> Timex.Duration.from_seconds()
+    |> PawMon.UptimeFormatter.format()
+  end
+
+  def format_downtime(downtime) do
+    downtime
     |> Timex.Duration.from_seconds()
     |> PawMon.UptimeFormatter.format()
   end
@@ -202,11 +215,14 @@ defmodule PawMonWeb.NodeLive.Index do
     |> Decimal.mult(100)
   end
 
+  def format_integer(nil), do: "?"
   def format_integer(number), do: Number.Delimit.number_to_delimited(number, precision: 0)
 
-  def format_number(number, precision \\ 2), do: Number.Delimit.number_to_delimited(number, precision: precision)
+  def format_number(num, precision \\ 2)
+  def format_number(nil, _), do: "?"
+  def format_number(number, precision), do: Number.Delimit.number_to_delimited(number, precision: precision)
 
-  def format_balance(nil), do: 0
+  def format_balance(nil), do: "?"
   def format_balance("0"), do: 0
   def format_balance(balance), do: format_number(from_raw(Decimal.new(balance)), 3)
 
