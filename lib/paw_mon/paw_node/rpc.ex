@@ -9,7 +9,7 @@ defmodule PawMon.PawNode.RPC do
       Tesla.Middleware.JSON
     ]
 
-    Tesla.client(middleware)
+    Tesla.client(middleware, {Tesla.Adapter.Hackney, [recv_timeout: 1_000]})
   end
 
   def telemetry(client) do

@@ -13,9 +13,10 @@ defmodule PawMon.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: PawMon.PubSub},
       # Start the Endpoint (http/https)
-      PawMonWeb.Endpoint
+      PawMonWeb.Endpoint,
       # Start a worker by calling: PawMon.Worker.start_link(arg)
       # {PawMon.Worker, arg}
+      {PawMon.PawNode, name: PawMon.PawNode}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
