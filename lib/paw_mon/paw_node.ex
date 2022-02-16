@@ -22,8 +22,12 @@ defmodule PawMon.PawNode do
       {:ok, ip_info} <- ip_info(),
       {:ok, config} <- load_pawmon_config()
     ) do
+      node = get_node(config)
       description = load_node_description(Map.get(config, "node", %{}))
       state = %{}
+      |> Map.put(:live_action, :index)
+      |> Map.put(:page_title, node["name"])
+      |> Map.put(:node, node)
       |> Map.put(:setup_unfinished, :false)
       |> Map.put(:node_location, node_location(ip_info))
       |> Map.put(:description, description)
@@ -31,7 +35,9 @@ defmodule PawMon.PawNode do
       |> Map.put(:rpc_failed, false)
       |> Map.put(:previously_online, false)
       |> Map.put(:downtime, 0)
-      |> load_full_node_status()
+      |> Map.put(:initializing, true)
+      |> load_os_data()
+      |> trigger_status_update()
 
       :timer.send_interval(5000, :update)
 
@@ -56,11 +62,37 @@ defmodule PawMon.PawNode do
     {:ok, state}
   end
 
+  def trigger_status_update(state) do
+    Task.Supervisor.async_nolink(PawMon.TaskSupervisor, fn -> load_full_node_status(state) end)
+
+    state
+  end
+
   @impl true
   def handle_info(:update, state) do
-    state = load_full_node_status(state)
+    trigger_status_update(state)
+
+    {:noreply, state}
+  end
+
+  # If the task succeeds...
+  def handle_info({ref, node_status}, state) do
+    # The task succeed so we can cancel the monitoring and discard the DOWN message
+    Process.demonitor(ref, [:flush])
+
+    state = Map.merge(state, node_status)
+    |> Map.put(:initializing, false)
 
     PubSub.broadcast(PawMon.PubSub, "paw_node", {:status_update, state})
+    {:noreply, state}
+  end
+
+  # If the task fails...
+  def handle_info({:DOWN, _ref, _, _, reason}, state) do
+    IO.puts "Status update failed with reason #{inspect(reason)}"
+
+    state = state
+    |> Map.put(:initializing, false)
 
     {:noreply, state}
   end
@@ -70,29 +102,30 @@ defmodule PawMon.PawNode do
     {:reply, state, state}
   end
 
-  def load_full_node_status(state) do
-    node = get_node(state.config)
-    client = RPC.rpc_client(state.config)
+  def load_os_data(state) do
     os_data = get_os_data()
 
-    state = state
-    |> Map.put(:node, node)
+    state
     |> Map.put(:os_data, os_data)
-    |> Map.put(:page_title, node["name"])
-    |> Map.put(:live_action, :index)
+  end
+
+  def load_full_node_status(state) do
+    client = RPC.rpc_client(state.config)
+
+    node_status = %{}
 
     with(
       {:ok, telemetry} <- RPC.telemetry(client),
       {:ok, block_count} <- RPC.block_count(client),
       {:ok, uptime} <- RPC.uptime(client),
       {:ok, peers} <- RPC.peers(client),
-      {:ok, account_balance} <- RPC.account_balance(client, node["account"]),
-      {:ok, account_weight} <- RPC.account_weight(client, node["account"]),
-      {:ok, delegators_count} <- RPC.delegators_count(client, node["account"]),
+      {:ok, account_balance} <- RPC.account_balance(client, state.node["account"]),
+      {:ok, account_weight} <- RPC.account_weight(client, state.node["account"]),
+      {:ok, delegators_count} <- RPC.delegators_count(client, state.node["account"]),
       {:ok, reps} <- RPC.reps_online(client),
       {:ok, quorum} <- RPC.confirmation_quorum(client)
     ) do
-      state
+      node_status
       |> Map.put(:telemetry, telemetry)
       |> Map.put(:block_count, block_count)
       |> Map.put(:peer_count, length(Map.keys(peers)))
@@ -107,9 +140,11 @@ defmodule PawMon.PawNode do
       |> Map.put(:rpc_failed, false)
       |> Map.put(:previously_online, true)
       |> Map.put(:last_online, System.os_time(:second))
+      |> load_os_data()
+
     else
       _error ->
-        state
+        node_status
         |> assign_downtime()
         |> Map.put(:rpc_failed, true)
     end

@@ -16,6 +16,7 @@ defmodule PawMon.Application do
       PawMonWeb.Endpoint,
       # Start a worker by calling: PawMon.Worker.start_link(arg)
       # {PawMon.Worker, arg}
+      {Task.Supervisor, name: PawMon.TaskSupervisor},
       {PawMon.PawNode, name: PawMon.PawNode}
     ]
 

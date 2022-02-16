@@ -89,6 +89,19 @@
     </div>
   </div>
 
+<%= if @initializing do %>
+  <div class="col-span-12">
+    <div class="uppercase font-light tracking-widest text-xs mb-2">Startup</div>
+    <div class="col-span-12 bg-gradient-to-tr from-sky-600 to-cyan-500 text-white shadow-sm rounded text-shadow py-2 pl-3 pr-3">
+      <div class="text-sm font-semibold tracking-wide mb-1">
+        Almost there
+      </div>
+      <div class="leading-tight text-cyan-50">
+        PawMon is still starting up. If all goes well, your node stats will replace this message in a moment.
+      </div>
+    </div>
+  </div>
+<% else %>
 <%= if @rpc_failed do %>
   <div class="col-span-12">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Oops!</div>
@@ -214,4 +227,5 @@
 <% end %>
 </div>
 
+<% end %>
 <% end %>
