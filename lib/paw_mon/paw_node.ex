@@ -145,18 +145,18 @@ defmodule PawMon.PawNode do
     else
       _error ->
         node_status
-        |> assign_downtime()
+        |> assign_downtime(state)
         |> Map.put(:rpc_failed, true)
     end
   end
 
-  defp assign_downtime(%{last_online: last_online} = state) do
+  defp assign_downtime(state, %{last_online: last_online}) do
     now = System.os_time(:second)
 
     state
     |> Map.put(:downtime, now - last_online)
   end
-  defp assign_downtime(state), do: Map.put(state, :downtime, nil)
+  defp assign_downtime(state, _), do: Map.put(state, :downtime, nil)
 
   def load_pawmon_config() do
     path = Path.join([data_dir(), "/config.toml"])
