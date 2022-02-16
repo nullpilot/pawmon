@@ -105,9 +105,9 @@
 <%= if @rpc_failed do %>
   <div class="col-span-12">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Oops!</div>
-    <div class="col-span-12 bg-gradient-to-tr from-red-600 to-amber-500 text-white shadow-sm rounded py-2 pl-3 pr-3">
+    <div class="col-span-12 bg-gradient-to-tr from-red-600 to-amber-500 text-white shadow-sm rounded text-shadow py-2 pl-3 pr-3">
       <%= if @previously_online do %>
-        <div class="text-sm tracking-wide mb-1">
+        <div class="text-sm font-semibold tracking-wide mb-1">
           Failed to query node.
         </div>
         <div class="leading-tight text-red-50">
@@ -115,7 +115,7 @@
           Last online: <span class="font-semibold text-white"><%= format_downtime(@downtime) %></span> ago.
         </div>
       <% else %>
-        <div class="text-sm tracking-wide mb-1">
+        <div class="text-sm font-semibold tracking-wide mb-1">
           Could not query PAW node.
         </div>
         <div class="leading-tight text-red-50">
@@ -125,33 +125,32 @@
     </div>
   </div>
 <% else %>
-
   <div class="col-span-12 row-start-1">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Status</div>
     <div class="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-2">
-      <div class="flex flex-col gap-1 bg-white shadow-sm rounded py-2 px-3 text-white bg-gradient-to-tr from-emerald-600 to-green-400">
+      <div class="flex flex-col gap-1 shadow-sm rounded py-2 px-3 text-white text-shadow bg-gradient-to-tr from-emerald-600 to-green-400">
         <div class="text-sm tracking-wide truncate">Version</div>
         <div class="text-xl font-semibold leading-tight"><%= format_version(@telemetry) %></div>
       </div>
 
-      <div class="flex flex-col gap-1 bg-white shadow-sm rounded py-2 px-3 text-white bg-gradient-to-tr from-blue-500 to-sky-400">
+      <div class="flex flex-col gap-1 shadow-sm rounded py-2 px-3 text-white text-shadow bg-gradient-to-tr from-blue-500 to-sky-400">
         <div class="text-sm tracking-wide truncate">Uptime</div>
         <div class="text-xl font-semibold leading-tight"><%= format_uptime(@uptime) %></div>
       </div>
 
-      <div class="flex flex-col gap-1 bg-white shadow-sm rounded py-2 px-3 text-white bg-gradient-to-tr from-violet-600 to-fuchsia-600">
+      <div class="flex flex-col gap-1 shadow-sm rounded py-2 px-3 text-white text-shadow bg-gradient-to-tr from-violet-600 to-fuchsia-600">
         <div class="text-sm tracking-wide truncate">Sync Status</div>
         <div class="text-xl font-semibold leading-tight"><%= format_integer(@sync_status) %>%</div>
       </div>
 
-      <div class="flex flex-col gap-1 bg-white shadow-sm rounded py-2 px-3 bg-white">
+      <div class="flex flex-col gap-1 shadow-sm rounded py-2 px-3 bg-white">
         <div class="text-sm tracking-wide truncate">Location</div>
         <div class="text-xl font-semibold leading-tight"><%= @node_location %></div>
       </div>
     </div>
   </div>
 
-  <div class="col-span-12 xs:col-span-6 lg:col-span-4 xs:row-start-auto">
+  <div class="col-span-12 xs:col-span-6 md:col-span-4 xs:row-start-auto">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Blocks</div>
     <div class="flex flex-col gap-2">
       <div class="bg-white shadow-sm rounded py-2 pl-3 pr-3">
@@ -171,7 +170,7 @@
     </div>
   </div>
 
-  <div class="col-span-12 xs:col-span-6 lg:col-span-4 xs:row-start-auto">
+  <div class="col-span-12 md:col-span-4 xs:row-start-4 md:row-start-auto">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Account</div>
     <div class="flex flex-col gap-2">
       <div class="bg-white shadow-sm rounded py-2 pl-3 pr-3">
@@ -203,7 +202,7 @@
     </div>
   </div>
 
-  <div class="col-span-12 lg:col-span-4 xs:row-start-auto">
+  <div class="col-span-12 xs:col-span-6 md:col-span-4 xs:row-start-auto">
     <div class="uppercase font-light tracking-widest text-xs mb-2">Network</div>
     <div class="flex flex-col gap-2">
       <div class="bg-white shadow-sm rounded py-2 pl-3 pr-3">

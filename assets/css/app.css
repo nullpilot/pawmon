@@ -15,6 +15,10 @@
     -o-user-drag: none;
     user-drag: none;
   }
+
+  .text-shadow {
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+  }
 }
 
 /* Alerts and form errors used by phx.new */
