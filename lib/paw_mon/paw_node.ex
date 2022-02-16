@@ -221,7 +221,7 @@ defmodule PawMon.PawNode do
       Tesla.Middleware.JSON
     ])
 
-    case Tesla.get(client, "/5.9.62.111/json") do
+    case Tesla.get(client, "/json") do
       {:ok, %Tesla.Env{status: 200, body: ip_info}} -> {:ok, ip_info}
       {:error, error} -> {:error, error}
     end
